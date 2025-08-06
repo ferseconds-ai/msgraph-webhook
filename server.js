@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 
 app.use(express.json());
+app.disable("etag"); // disable caching
 
 app.get("/sp-listener", (req, res) => {
   const token = req.query.validationToken;
@@ -12,10 +13,11 @@ app.get("/sp-listener", (req, res) => {
 
   console.log("✅ Returning validation token:", token);
 
-  // ⚠️ This is key: manually set headers and avoid charset
-  res.status(200);
+  const buffer = Buffer.from(token);
   res.setHeader("Content-Type", "text/plain");
-  res.send(Buffer.from(token));
+  res.setHeader("Content-Length", buffer.length); // 👈 prevent chunked encoding
+  res.setHeader("Cache-Control", "no-cache");
+  res.status(200).send(buffer);
 });
 
 app.post("/sp-listener", (req, res) => {
