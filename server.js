@@ -10,13 +10,16 @@ app.get("/sp-listener", (req, res) => {
     return res.status(400).send("Missing validationToken");
   }
 
-  console.log("✅ Validation token received:", token);
-  res.set("Content-Type", "text/plain");
-  res.send(token); // Return raw token
+  console.log("✅ Returning validation token:", token);
+
+  // ⚠️ This is key: manually set headers and avoid charset
+  res.status(200);
+  res.setHeader("Content-Type", "text/plain");
+  res.send(Buffer.from(token));
 });
 
 app.post("/sp-listener", (req, res) => {
-  console.log("📬 Change notification received:");
+  console.log("📬 Notification received:");
   console.dir(req.body, { depth: null });
   res.sendStatus(200);
 });
